@@ -33,21 +33,21 @@ app.get("/", (req, res) => {
   res.status(200).json("Notification API is running");
 });
 
-const connectedUsers = new Map();
+// const connectedUsers = new Map();
 io.use((socket, next) => {
   const { username, userId } = socket.handshake.auth;
   if (!username && !userId) {
     console.log("Invalid user details");
     return next(new Error("Invalid user details"));
   }
-  if (connectedUsers.has(userId)) {
-    console.log("already connected");
-    return next(new Error("already connected"));
-  }
+  // if (connectedUsers.has(userId)) {
+  //   console.log("already connected");
+  //   return next(new Error("already connected"));
+  // }
   if (username && userId) {
     socket.username = username;
     socket.id = userId;
-    connectedUsers.set(userId, socket.id);
+    // connectedUsers.set(userId, socket.id);
     return next();
   }
 });
@@ -55,7 +55,6 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id, socket.username);
   const userId = socket.handshake.auth.userId;
-  console.log({ connectedUsers });
 
   // Handle notification acknowledgements
   socket.on(events.POST_INTERACTIONS, (notificationId) => {
