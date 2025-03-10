@@ -11,7 +11,10 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const corsOption = {
-  origin: process.env.CLIENT_URL,
+  origin:
+    process.env.NODE_ENV === "development"
+      ? process.env.CLIENT_URL_DEV
+      : process.env.CLIENT_URL_LIVE,
   methods: ["*"],
   preflightContinue: false,
   optionsSuccessStatus: 204,
@@ -37,11 +40,9 @@ app.get("/", (req, res) => {
 io.use((socket, next) => {
   const { username, userId } = socket.handshake.auth;
   if (!username && !userId) {
-    console.log("Invalid user details");
     return next(new Error("Invalid user details"));
   }
   // if (connectedUsers.has(userId)) {
-  //   console.log("already connected");
   //   return next(new Error("already connected"));
   // }
   if (username && userId) {
@@ -53,17 +54,21 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id, socket.username);
-  const userId = socket.handshake.auth.userId;
+  const userName = socket.username;
+  const userId = socket.id;
+  console.log("connected");
+  socket.emit(
+    "connected",
+    `User: ${userName}, ID: ${userId} is connected to the socket`
+  );
 
-  // Handle notification acknowledgements
-  socket.on(events.POST_INTERACTIONS, (notificationId) => {
-    console.log(`Notification ${notificationId} marked as read by ${userId}`);
+  socket.on("POST_CREATED", (data) => {
+    console.log("POST_CREATED", data);
+    io.emit(events.POST_CREATED, data);
   });
 
   socket.on("disconnect", (reason) => {
-    connectedUsers.delete(socket.id);
-    console.log("User disconnected:", socket.id, socket.username, reason);
+    console.log("disconnected");
     if (reason === "io server disconnect") {
       socket.connect();
     }
