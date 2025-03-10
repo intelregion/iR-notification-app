@@ -30,7 +30,7 @@ app.options("*", cors(corsOption));
 
 // Basic route
 app.get("/", (req, res) => {
-  res.status(200).json("Notification API is running");
+  res.status(200).json("iR notification app is running");
 });
 
 // const connectedUsers = new Map();
