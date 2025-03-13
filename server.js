@@ -62,9 +62,13 @@ io.on("connection", (socket) => {
     `User: ${userName}, ID: ${userId} is connected to the socket`
   );
 
-  socket.on("POST_CREATED", (data) => {
-    console.log("POST_CREATED", data);
+  socket.on(events.POST_CREATED, (data) => {
+    console.log(events.POST_CREATED, data);
     io.emit(events.POST_CREATED, data);
+  });
+  socket.on(events.POST_APPROVED, (authorId) => {
+    console.log(events.POST_APPROVED, authorId);
+    io.to(authorId).emit(events.POST_APPROVED, authorId);
   });
 
   socket.on("disconnect", (reason) => {
